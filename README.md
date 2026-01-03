@@ -6,7 +6,7 @@ A comprehensive data science project that predicts exoplanet surface temperature
 
 This project bridges astronomy and machine learning by building a predictive model for exoplanet equilibrium temperatures. The fascinating aspect is that through log transformations, the model learns coefficients that match actual physics equations—essentially **rediscovering the Stefan-Boltzmann law from data alone**.
 
-**Key Achievement**: R² Score of **0.9945** with learned coefficients matching theoretical physics values.
+**Key Achievement**: R² Score of **0.9958** with learned coefficients matching theoretical physics values.
 
 ## Project Structure
 
@@ -95,7 +95,7 @@ model.fit(X_train, y_train)
 ## Results
 
 ### Model Performance
-- **R² Score**: 0.9945 (explains 99.45% of temperature variance)
+- **R² Score**: 0.9958 (explains 99.58% of temperature variance)
 - **Mean Absolute Error**: ~12-15 Kelvin
 
 ### Coefficient Validation
@@ -190,4 +190,5 @@ The notebook includes:
 - Approximates all host stars as having solar mass
 - Limited to Kepler's detection capabilities and field of view
 - Equilibrium temperature assumes no atmosphere or albedo effects
+
 
