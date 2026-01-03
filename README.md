@@ -1,85 +1,90 @@
 # Exoplanet Surface Temperature Prediction
 
-A data science project that predicts exoplanet surface temperatures using machine learning on NASA Kepler Observatory data.
+A comprehensive data science project that predicts exoplanet surface temperatures using machine learning on NASA Kepler Observatory data, featuring both analytical notebooks and an interactive web application.
 
 ## Project Overview
 
-In this project, I built a machine learning model to predict the surface temperature of exoplanets using Linear Regression. The interesting part is that by using log transformations, the model learns coefficients that match actual physics equations - basically rediscovering the Stefan-Boltzmann law from data alone.
+This project bridges astronomy and machine learning by building a predictive model for exoplanet equilibrium temperatures. The fascinating aspect is that through log transformations, the model learns coefficients that match actual physics equations—essentially **rediscovering the Stefan-Boltzmann law from data alone**.
 
-**Results**: R² Score of 0.9945 with learned coefficients matching theoretical physics values.
+**Key Achievement**: R² Score of **0.9945** with learned coefficients matching theoretical physics values.
 
-## Background: How Kepler Detects Exoplanets
+## Project Structure
 
-The Kepler Space Telescope uses the **Transit Method** to find planets:
+```
+exoplanet_surface_temperature_detection/
+│
+├── web/                                    # Streamlit Web Application
+│   ├── __pycache__/                       # Python cache files
+│   ├── app.py                             # Main Streamlit entry point
+│   ├── data_processing.py                 # Data pipeline & ML model
+│   └── visualization.py                   # UI components & plots
+│
+├── exoplanet_data.csv                     # Kepler dataset (upload here)
+├── exoplanet_surface_temperature_detection.ipynb  # Jupyter analysis notebook
+└── README.md                              # This file
+```
 
-1. Kepler continuously monitors the brightness of thousands of stars
-2. When a planet passes in front of its star, it blocks a small portion of the star's light
-3. This creates a periodic dip in the star's brightness (sometimes less than 1% dimmer)
-4. By measuring these repeating dips, scientists can confirm a planet's existence and calculate its orbital period
+## Background: The Kepler Transit Method
 
-This transit data is what I used for this project - it contains orbital periods, stellar properties, and calculated temperatures for thousands of exoplanet candidates.
+The Kepler Space Telescope uses the **Transit Method** to detect exoplanets:
+
+1. **Continuous Monitoring**: Kepler observes the brightness of thousands of stars
+2. **Transit Detection**: When a planet passes in front of its star, it blocks a small portion of light (~0.01-1% dimmer)
+3. **Periodic Dips**: These repeating brightness dips confirm a planet's existence
+4. **Data Extraction**: From these transits, scientists calculate orbital periods and stellar properties
+
+This transit data forms the foundation of our predictive model.
 
 ## Dataset
 
-**Source**: Kaggle - Kepler Exoplanet Search Results
+**Source**: [Kaggle - Kepler Exoplanet Search Results](https://www.kaggle.com/nasa/kepler-exoplanet-search-results)
 
-**Description**: ~10,000 exoplanet candidates observed by NASA's Kepler Space Observatory from 2009-2017
+**Description**: ~10,000 exoplanet candidates observed by NASA's Kepler Space Observatory (2009-2017)
 
-**Features Used**:
-- `koi_disposition` - Classification: CONFIRMED, CANDIDATE, or FALSE POSITIVE
-- `koi_period` - Orbital period (days)
-- `koi_steff` - Host star temperature (Kelvin)
-- `koi_srad` - Host star radius (solar radii)
-- `koi_teq` - Planet equilibrium temperature (target variable)
-
-**Dataset Link**: https://www.kaggle.com/nasa/kepler-exoplanet-search-results
+**Key Features**:
+| Column | Description | Unit |
+|--------|-------------|------|
+| `koi_disposition` | Classification status | CONFIRMED/CANDIDATE/FALSE POSITIVE |
+| `koi_period` | Orbital period | Days |
+| `koi_steff` | Host star temperature | Kelvin |
+| `koi_srad` | Host star radius | Solar radii |
+| `koi_teq` | Planet equilibrium temperature (target) | Kelvin |
 
 ## Problem Statement
 
-Direct measurement of exoplanet temperatures is nearly impossible because the host star's brightness overwhelms any thermal signal from the planet. However, I can predict temperature using the planet's orbital characteristics and its star's properties by applying physics-based feature engineering.
+Direct measurement of exoplanet temperatures is nearly impossible—the host star's brightness overwhelms any thermal signal from the planet. However, we can **predict temperature** using orbital characteristics and stellar properties through physics-based feature engineering.
 
-## Approach
+## Methodology
 
 ### 1. Data Cleaning
-
-I filtered out FALSE POSITIVE entries from the dataset. These represent eclipsing binary stars or instrumental artifacts that don't follow planetary physics, so including them would hurt model accuracy.
+Filter out FALSE POSITIVE entries (eclipsing binaries, instrumental artifacts) that don't follow planetary physics:
 
 ```python
 df = df[df['koi_disposition'].isin(['CONFIRMED', 'CANDIDATE'])]
 ```
 
-### 2. Feature Engineering: Calculating Orbital Distance
-
-The dataset provides orbital period but not distance. I calculated the orbital distance using Kepler's Third Law:
+### 2. Feature Engineering: Kepler's Third Law
+Calculate orbital distance from period:
 
 ```python
-Distance = (Period / 365.25) ** (2/3)
+Distance = (Period / 365.25) ** (2/3)  # Result in AU
 ```
 
-This assumes the host star has approximately solar mass and gives distance in Astronomical Units (AU).
-
 ### 3. Log Transformation
+Transform the physics equation from non-linear to linear form:
 
-The physics equation for planetary temperature is:
-
+**Original Physics (Stefan-Boltzmann Law)**:
 ```
 T_planet = T_star × √(R_star / 2D)
 ```
 
-This is a non-linear power-law relationship. To make it work with Linear Regression, I applied log transformation:
-
-```python
-log(T_planet) = log(T_star) + 0.5 × log(R_star) - 0.5 × log(D) - constant
+**Log-Transformed (Linear)**:
+```
+log(T_planet) = log(T_star) + 0.5×log(R_star) - 0.5×log(D) - constant
 ```
 
-Now it's linear, and the coefficients should match the physics:
-- **log(T_star) coefficient**: should be 1.0
-- **log(R_star) coefficient**: should be 0.5
-- **log(D) coefficient**: should be -0.5
-
 ### 4. Model Training
-
-I split the data 80-20 for training and testing, then fit a Linear Regression model on the log-transformed features.
+Train Linear Regression on log-transformed features:
 
 ```python
 X = data[['log_dist', 'log_star_temp', 'log_star_radius']]
@@ -91,64 +96,98 @@ model.fit(X_train, y_train)
 ## Results
 
 ### Model Performance
-
 - **R² Score**: 0.9945 (explains 99.45% of temperature variance)
 - **Mean Absolute Error**: ~12-15 Kelvin
 
-### Coefficient Analysis
+### Coefficient Validation
+| Feature | Learned Coefficient | Theoretical Value | Status |
+|---------|-------------------|-------------------|--------|
+| log(Distance) | -0.5000 | -0.5 | Perfect Match |
+| log(Star Temperature) | 1.0000 | 1.0 | Perfect Match |
+| log(Star Radius) | 0.5000 | 0.5 | Perfect Match |
 
-| Feature | Learned Coefficient | Theoretical Value | Match |
-|---------|-------------------|-------------------|-------|
-| log(Distance) | -0.5000 | -0.5 | ✓ |
-| log(Star_Temp) | 1.0000 | 1.0 | ✓ |
-| log(Star_Radius) | 0.5000 | 0.5 | ✓ |
-
-The model successfully recovered the theoretical physics constants from the data, validating both the model and the underlying physics assumptions.
-
-### Visualization
-
-I created two visualizations:
-
-1. **Correlation Heatmap**: Shows relationships between orbital distance, stellar properties, and planet temperature
-2. **Prediction Scatter Plot**: Actual vs predicted temperatures with a color gradient (plasma colormap) showing the temperature range from cold outer planets to hot Jupiters
-
-## Technical Implementation
-
-**Libraries Used**:
-- pandas - Data manipulation
-- numpy - Numerical operations and log transformations
-- matplotlib & seaborn - Data visualization
-- scikit-learn - Machine learning (Linear Regression, train-test split, metrics)
+**Interpretation**: The model successfully recovered theoretical physics constants from raw data, validating both the model and underlying physics assumptions.
 
 ## Installation & Usage
 
+### Prerequisites
 ```bash
-pip install pandas numpy matplotlib seaborn scikit-learn
+pip install streamlit pandas numpy matplotlib seaborn scikit-learn jupyter
 ```
 
-Download the dataset from Kaggle, save as `exoplanet_data.csv`, then run:
+### Option 1: Interactive Web App (Streamlit)
 
+1. Navigate to the web folder:
 ```bash
-python exoplanet_predictor.py
+cd web
 ```
 
-**Output**:
-- Model coefficients
-- R² score and MAE
-- Correlation heatmap
-- Predicted vs actual temperature scatter plot
-- Sample predictions table with 5 planets
+2. Run the Streamlit application:
+```bash
+streamlit run app.py
+```
+
+3. Upload `exoplanet_data.csv` via the sidebar
+
+4. Adjust simulator parameters:
+   - Orbital Period (1-1000 days)
+   - Star Temperature (3000-10000 K)
+   - Star Radius (0.1-10 solar radii)
+
+5. View real-time predictions and habitability classification
+
+### Option 2: Jupyter Notebook Analysis
+
+```bash
+jupyter notebook exoplanet_surface_temperature_detection.ipynb
+```
+
+The notebook includes:
+- Detailed exploratory data analysis
+- Step-by-step model development
+- Coefficient interpretation
+- Visualization of results
+
+## Web Application Features
+
+### Interactive Simulator
+- Real-time temperature prediction
+- Habitability zone classification (180-330 K)
+- Distance calculation in AU
+
+### Visualizations
+1. **Correlation Heatmap**: Relationships between orbital/stellar properties
+2. **Actual vs Predicted Plot**: Model accuracy visualization with color-coded temperatures
+3. **Current Simulation Marker**: Highlighted prediction on scatter plot
+
+### Educational Component
+- Expandable physics/math section
+- Stefan-Boltzmann law explanation
+- Kepler's Third Law derivation
+- Log transformation rationale
+
+## Technical Stack
+
+**Data Science**:
+- `pandas` - Data manipulation
+- `numpy` - Numerical operations and log transformations
+- `scikit-learn` - Machine learning (Linear Regression, metrics)
+
+**Visualization**:
+- `matplotlib` - Static plotting
+- `seaborn` - Statistical visualizations
+- `streamlit` - Interactive web dashboard
 
 ## Key Insights
 
-- **Data Quality Matters**: Removing false positives improved model accuracy significantly
-- **Domain Knowledge is Crucial**: Understanding the physics allowed me to engineer the right features (distance from period)
-- **Simple Models Can Be Powerful**: Linear Regression achieved near-perfect results when the problem was properly formulated
-- **Interpretable ML**: The learned coefficients have real physical meaning, making this a white-box model rather than a black-box
+ **Data Quality Matters**: Removing false positives improved accuracy significantly  
+ **Domain Knowledge is Crucial**: Understanding physics enabled correct feature engineering  
+ **Simple Models Can Be Powerful**: Linear Regression achieved near-perfect results with proper formulation  
+ **Interpretable ML**: Learned coefficients have real physical meaning (white-box model)
 
 ## Limitations
 
 - Ignores atmospheric greenhouse effects
 - Approximates all host stars as having solar mass
 - Limited to Kepler's detection capabilities and field of view
-**Note**: This project demonstrates how domain knowledge in physics combined with proper feature engineering can lead to highly accurate and interpretable machine learning models in astronomy.
+- Equilibrium temperature assumes no atmosphere or albedo effects
