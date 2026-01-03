@@ -14,7 +14,6 @@ This project bridges astronomy and machine learning by building a predictive mod
 exoplanet_surface_temperature_detection/
 │
 ├── web/                                    # Streamlit Web Application
-│   ├── __pycache__/                       # Python cache files
 │   ├── app.py                             # Main Streamlit entry point
 │   ├── data_processing.py                 # Data pipeline & ML model
 │   └── visualization.py                   # UI components & plots
@@ -191,3 +190,4 @@ The notebook includes:
 - Approximates all host stars as having solar mass
 - Limited to Kepler's detection capabilities and field of view
 - Equilibrium temperature assumes no atmosphere or albedo effects
+
