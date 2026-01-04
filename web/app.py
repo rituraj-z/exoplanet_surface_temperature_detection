@@ -9,7 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("Exoplanet Habitability Predictor")
+st.title("EXOPLANET SURFACE TEMPERATURE PREDICTION")
 st.markdown("""
 Predict surface temperature of exoplanets using Linear Regression on Kepler Telescope data.
 """)
