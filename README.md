@@ -4,9 +4,9 @@ A comprehensive data science project that predicts exoplanet surface temperature
 
 ## Project Overview
 
-This project bridges astronomy and machine learning by building a predictive model for exoplanet equilibrium temperatures. The fascinating aspect is that through log transformations, the model learns coefficients that match actual physics equations—essentially **rediscovering the Stefan-Boltzmann law from data alone**.
+This project bridges astronomy and machine learning by building a predictive model for exoplanet equilibrium temperatures. The fascinating aspect is that through log transformations, the model learns coefficients that approximately matches actual physics equations.
 
-**Key Achievement**: R² Score of **0.9958** with learned coefficients matching theoretical physics values.
+**Key Achievement**: R² Score of **0.9958**.
 
 ## Project Structure
 
@@ -99,13 +99,13 @@ model.fit(X_train, y_train)
 - **Mean Absolute Error**: ~10.16 Kelvin
 
 ### Coefficient Validation
-| Feature | Learned Coefficient | Theoretical Value | Status |
-|---------|-------------------|-------------------|--------|
-| log(Distance) | -0.5000 | -0.5 | Perfect Match |
-| log(Star Temperature) | 1.0000 | 1.0 | Perfect Match |
-| log(Star Radius) | 0.5000 | 0.5 | Perfect Match |
+| Feature | Learned Coefficient | Theoretical Value |
+|---------|-------------------|-------------------|
+| log(Distance) | -0.499 | -0.5 |
+| log(Star Temperature) | 0.828 | 1.0 |
+| log(Star Radius) | 0.442 | 0.5 |
 
-**Interpretation**: The model successfully recovered theoretical physics constants from raw data, validating both the model and underlying physics assumptions.
+**Interpretation**: The model successfully recovered theoretical physics constants from raw data.
 
 ## Installation & Usage
 
@@ -190,6 +190,7 @@ The notebook includes:
 - Approximates all host stars as having solar mass
 - Limited to Kepler's detection capabilities and field of view
 - Equilibrium temperature assumes no atmosphere or albedo effects
+
 
 
 
